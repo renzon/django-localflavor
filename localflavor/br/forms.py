@@ -13,8 +13,11 @@ from django.utils.translation import ugettext_lazy as _
 
 from localflavor.compat import EmptyValueCompatMixin
 from localflavor.generic.forms import DeprecatedPhoneNumberFormFieldMixin
-
 from .br_states import STATE_CHOICES
+
+# Bellow code define only Form Fields not related to any specific Model field
+# Form localfavor > 1.5 br.models are defined with related form fields and
+# should be the prefered way of using this once it is easier
 
 phone_digits_re = re.compile(r'^(\d{2})[-\.]?(\d{4,5})[-\.]?(\d{4})$')
 cpf_digits_re = re.compile(r'^(\d{3})\.(\d{3})\.(\d{3})-(\d{2})$')
@@ -27,7 +30,8 @@ process_digits_re = re.compile(
 
 
 class BRZipCodeField(RegexField):
-    """A form field that validates input as a Brazilian zip code, with the format XXXXX-XXX."""
+    """A form field that validates input as a Brazilian zip code, with the
+    format XXXXX-XXX."""
 
     default_error_messages = {
         'invalid': _('Enter a zip code in the format XXXXX-XXX.'),
@@ -35,14 +39,16 @@ class BRZipCodeField(RegexField):
 
     def __init__(self, max_length=None, min_length=None, *args, **kwargs):
         super(BRZipCodeField, self).__init__(r'^\d{5}-\d{3}$',
-                                             max_length, min_length, *args, **kwargs)
+                                             max_length, min_length, *args,
+                                             **kwargs)
 
 
 class BRPhoneNumberField(Field, DeprecatedPhoneNumberFormFieldMixin):
     """
     A form field that validates input as a Brazilian phone number.
 
-    The phone number must be in either of the following formats: XX-XXXX-XXXX or XX-XXXXX-XXXX.
+    The phone number must be in either of the following formats:
+    XX-XXXX-XXXX or XX-XXXXX-XXXX.
     """
 
     default_error_messages = {
@@ -62,7 +68,8 @@ class BRPhoneNumberField(Field, DeprecatedPhoneNumberFormFieldMixin):
 
 
 class BRStateSelect(Select):
-    """A Select widget that uses a list of Brazilian states/territories as its choices."""
+    """A Select widget that uses a list of Brazilian states/territories as
+    its choices."""
 
     def __init__(self, attrs=None):
         super(BRStateSelect, self).__init__(attrs, choices=STATE_CHOICES)
@@ -73,11 +80,15 @@ class BRStateChoiceField(Field):
 
     widget = Select
     default_error_messages = {
-        'invalid': _('Select a valid brazilian state. That state is not one of the available states.'),
+        'invalid': _(
+            'Select a valid brazilian state. That state is not one of the '
+            'available states.'),
     }
 
-    def __init__(self, required=True, widget=None, label=None, initial=None, help_text=None):
-        super(BRStateChoiceField, self).__init__(required, widget, label, initial, help_text)
+    def __init__(self, required=True, widget=None, label=None, initial=None,
+                 help_text=None):
+        super(BRStateChoiceField, self).__init__(required, widget, label,
+                                                 initial, help_text)
         self.widget.choices = STATE_CHOICES
 
     def clean(self, value):
@@ -87,7 +98,8 @@ class BRStateChoiceField(Field):
         value = force_text(value)
         if value == '':
             return value
-        valid_values = set([force_text(entry[0]) for entry in self.widget.choices])
+        valid_values = set(
+            [force_text(entry[0]) for entry in self.widget.choices])
         if value not in valid_values:
             raise ValidationError(self.error_messages['invalid'])
         return value
@@ -108,7 +120,8 @@ class BRCPFField(EmptyValueCompatMixin, CharField):
     """
     A form field that validates a CPF number or a CPF string.
 
-    A CPF number is compounded by XXX.XXX.XXX-VD. The two last digits are check digits.
+    A CPF number is compounded by XXX.XXX.XXX-VD. The two last digits are
+    check digits.
 
     More information:
     http://en.wikipedia.org/wiki/Cadastro_de_Pessoas_F%C3%ADsicas
@@ -116,14 +129,17 @@ class BRCPFField(EmptyValueCompatMixin, CharField):
 
     default_error_messages = {
         'invalid': _("Invalid CPF number."),
-        'max_digits': _("This field requires at most 11 digits or 14 characters."),
+        'max_digits': _(
+            "This field requires at most 11 digits or 14 characters."),
     }
 
     def __init__(self, max_length=14, min_length=11, *args, **kwargs):
-        super(BRCPFField, self).__init__(max_length, min_length, *args, **kwargs)
+        super(BRCPFField, self).__init__(max_length, min_length, *args,
+                                         **kwargs)
 
     def clean(self, value):
-        """Value can be either a string in the format XXX.XXX.XXX-XX or an 11-digit number."""
+        """Value can be either a string in the format XXX.XXX.XXX-XX or an
+        11-digit number."""
         value = super(BRCPFField, self).clean(value)
         if value in self.empty_values:
             return self.empty_value
@@ -140,11 +156,11 @@ class BRCPFField(EmptyValueCompatMixin, CharField):
         orig_dv = value[-2:]
 
         new_1dv = sum([i * int(value[idx])
-                      for idx, i in enumerate(range(10, 1, -1))])
+                       for idx, i in enumerate(range(10, 1, -1))])
         new_1dv = dv_maker(new_1dv % 11)
         value = value[:-2] + str(new_1dv) + value[-1]
         new_2dv = sum([i * int(value[idx])
-                      for idx, i in enumerate(range(11, 1, -1))])
+                       for idx, i in enumerate(range(11, 1, -1))])
         new_2dv = dv_maker(new_2dv % 11)
         value = value[:-1] + str(new_2dv)
         if value[-2:] != orig_dv:
@@ -169,7 +185,8 @@ class BRCNPJField(EmptyValueCompatMixin, CharField):
 
     Otherwise both formats will be valid.
 
-    .. _Brazilian CNPJ: http://en.wikipedia.org/wiki/National_identification_number#Brazil
+    .. _Brazilian CNPJ:
+    http://en.wikipedia.org/wiki/National_identification_number#Brazil
     .. versionchanged:: 1.4
     """
 
@@ -179,10 +196,12 @@ class BRCNPJField(EmptyValueCompatMixin, CharField):
     }
 
     def __init__(self, min_length=14, max_length=18, *args, **kwargs):
-        super(BRCNPJField, self).__init__(max_length, min_length, *args, **kwargs)
+        super(BRCNPJField, self).__init__(max_length, min_length, *args,
+                                          **kwargs)
 
     def clean(self, value):
-        """Value can be either a string in the format XX.XXX.XXX/XXXX-XX or a group of 14 characters."""
+        """Value can be either a string in the format XX.XXX.XXX/XXXX-XX or
+        a group of 14 characters."""
         value = super(BRCNPJField, self).clean(value)
         if value in self.empty_values:
             return self.empty_value
@@ -198,10 +217,12 @@ class BRCNPJField(EmptyValueCompatMixin, CharField):
             raise ValidationError(self.error_messages['max_digits'])
         orig_dv = value[-2:]
 
-        new_1dv = sum([i * int(value[idx]) for idx, i in enumerate(list(range(5, 1, -1)) + list(range(9, 1, -1)))])
+        new_1dv = sum([i * int(value[idx]) for idx, i in enumerate(
+            list(range(5, 1, -1)) + list(range(9, 1, -1)))])
         new_1dv = dv_maker(new_1dv % 11)
         value = value[:-2] + str(new_1dv) + value[-1]
-        new_2dv = sum([i * int(value[idx]) for idx, i in enumerate(list(range(6, 1, -1)) + list(range(9, 1, -1)))])
+        new_2dv = sum([i * int(value[idx]) for idx, i in enumerate(
+            list(range(6, 1, -1)) + list(range(9, 1, -1)))])
         new_2dv = dv_maker(new_2dv % 11)
         value = value[:-1] + str(new_2dv)
         if value[-2:] != orig_dv:
@@ -216,9 +237,11 @@ def mod_97_base10(value):
 
 class BRProcessoField(EmptyValueCompatMixin, CharField):
     """
-    A form field that validates a Legal Process(Processo) number or a Legal Process string.
+    A form field that validates a Legal Process(Processo) number or a Legal
+    Process string.
 
-    A Processo number is compounded by NNNNNNN-DD.AAAA.J.TR.OOOO. The two DD digits are check digits.
+    A Processo number is compounded by NNNNNNN-DD.AAAA.J.TR.OOOO. The two DD
+    digits are check digits.
     More information:
     http://www.cnj.jus.br/busca-atos-adm?documento=2748
 
@@ -228,10 +251,12 @@ class BRProcessoField(EmptyValueCompatMixin, CharField):
     default_error_messages = {'invalid': _("Invalid Process number.")}
 
     def __init__(self, max_length=25, min_length=20, *args, **kwargs):
-        super(BRProcessoField, self).__init__(max_length, min_length, *args, **kwargs)
+        super(BRProcessoField, self).__init__(max_length, min_length, *args,
+                                              **kwargs)
 
     def clean(self, value):
-        """Value can be either a string in the format NNNNNNN-DD.AAAA.J.TR.OOOO or an 20-digit number."""
+        """Value can be either a string in the format
+        NNNNNNN-DD.AAAA.J.TR.OOOO or an 20-digit number."""
         value = super(BRProcessoField, self).clean(value)
         if value in self.empty_values:
             return self.empty_value

@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'tests.test_mx',
     'tests.test_ua',
     'tests.test_us',
+    'tests.test_br',
     'tests.test_pk',
     'tests.test_generic',
     'tests.test_deprecated',

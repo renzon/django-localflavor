@@ -1,10 +1,12 @@
 # -*- encoding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
 
-from localflavor.br.forms import (BRCNPJField, BRCPFField, BRPhoneNumberField, BRProcessoField, BRStateChoiceField,
+from localflavor.br.forms import (BRCNPJField, BRCPFField, BRPhoneNumberField,
+                                  BRProcessoField, BRStateChoiceField,
                                   BRStateSelect, BRZipCodeField)
+from .forms import BrCitizenForm
 
 
 class BRLocalFlavorTests(SimpleTestCase):
@@ -25,10 +27,13 @@ class BRLocalFlavorTests(SimpleTestCase):
     def test_BRCNPJField(self):
         error_format = {
             'invalid': ['Invalid CNPJ number.'],
-            'only_long_version': ['Ensure this value has at least 16 characters (it has 14).'],
-            # The long version can be 16 or 18 characters long so actual error message is set dynamically when the
+            'only_long_version': [
+                'Ensure this value has at least 16 characters (it has 14).'],
+            # The long version can be 16 or 18 characters long so actual
+            # error message is set dynamically when the
             # invalid_long dict is generated.
-            'only_short_version': ['Ensure this value has at most 14 characters (it has %s).'],
+            'only_short_version': [
+                'Ensure this value has at most 14 characters (it has %s).'],
         }
 
         long_version_valid = {
@@ -51,19 +56,29 @@ class BRLocalFlavorTests(SimpleTestCase):
         }
         self.assertFieldOutput(BRCNPJField, valid, invalid)
 
-        # The short versions should be invalid when 'min_length=16' passed to the field.
-        invalid_short = dict([(k, error_format['only_long_version']) for k in short_version_valid.keys()])
-        self.assertFieldOutput(BRCNPJField, long_version_valid, invalid_short, field_kwargs={'min_length': 16})
+        # The short versions should be invalid when 'min_length=16' passed
+        # to the field.
+        invalid_short = dict([(k, error_format['only_long_version']) for k in
+                              short_version_valid.keys()])
+        self.assertFieldOutput(BRCNPJField, long_version_valid, invalid_short,
+                               field_kwargs={'min_length': 16})
 
-        # The long versions should be invalid when 'max_length=14' passed to the field.
-        invalid_long = dict([(k, [error_format['only_short_version'][0] % len(k)]) for k in long_version_valid.keys()])
-        self.assertFieldOutput(BRCNPJField, short_version_valid, invalid_long, field_kwargs={'max_length': 14})
+        # The long versions should be invalid when 'max_length=14' passed to
+        #  the field.
+        invalid_long = dict(
+            [(k, [error_format['only_short_version'][0] % len(k)]) for k in
+             long_version_valid.keys()])
+        self.assertFieldOutput(BRCNPJField, short_version_valid, invalid_long,
+                               field_kwargs={'max_length': 14})
 
     def test_BRCPFField(self):
         error_format = ['Invalid CPF number.']
-        error_atmost_chars = ['Ensure this value has at most 14 characters (it has 15).']
-        error_atleast_chars = ['Ensure this value has at least 11 characters (it has 10).']
-        error_atmost = ['This field requires at most 11 digits or 14 characters.']
+        error_atmost_chars = [
+            'Ensure this value has at most 14 characters (it has 15).']
+        error_atleast_chars = [
+            'Ensure this value has at least 11 characters (it has 10).']
+        error_atmost = [
+            'This field requires at most 11 digits or 14 characters.']
         valid = {
             '663.256.017-26': '663.256.017-26',
             '66325601726': '66325601726',
@@ -169,7 +184,9 @@ class BRLocalFlavorTests(SimpleTestCase):
         self.assertHTMLEqual(f.render('states', 'PR'), out)
 
     def test_BRStateChoiceField(self):
-        error_invalid = ['Select a valid brazilian state. That state is not one of the available states.']
+        error_invalid = [
+            'Select a valid brazilian state. That state is not one of the '
+            'available states.']
         valid = {
             'AC': 'AC',
             'AL': 'AL',
@@ -203,3 +220,30 @@ class BRLocalFlavorTests(SimpleTestCase):
             'pr': error_invalid,
         }
         self.assertFieldOutput(BRStateChoiceField, valid, invalid)
+
+
+VALID_DATA = {'cpf': '95173252740', 'cpf_optional': ''}
+
+
+class BrCitizenTests(TestCase):
+    def setUp(self):
+        self.form = BrCitizenForm(VALID_DATA)
+
+    def test_is_valid(self):
+        self.assertTrue(self.form.is_valid())
+
+    # def test_clean_cpf(self):
+    #     valid_cpfs = [
+    #         ('663.256.017-26', '66325601726'),
+    #         ('66325601726', '66325601726'),
+    #         ('375.788.573-20', '37578857320'),
+    #         ('84828509895', '84828509895')
+    #     ]
+    #
+    #     for cpf, normalized in valid_cpfs:
+    #         with self.subTest(cpf):
+    #             valid_data = dict(VALID_DATA)
+    #             valid_data['cpf'] = cpf
+    #             form = BrCitizenForm(valid_data)
+    #             form.is_valid()
+    #             self.assertEqual(normalized, form.cleaned_data['cpf'])

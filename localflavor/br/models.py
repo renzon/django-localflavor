@@ -1,6 +1,7 @@
-from django.db.models.fields import CharField
+from django.db.models import CharField
 from django.utils.translation import ugettext_lazy as _
 
+from localflavor.br.validators import CPF_LEN, validate_cpf
 from .br_states import STATE_CHOICES
 
 
@@ -18,3 +19,12 @@ class BRStateField(CharField):
         name, path, args, kwargs = super(BRStateField, self).deconstruct()
         del kwargs['choices']
         return name, path, args, kwargs
+
+
+class CPFField(CharField):
+    description = _('Brazilian cpf number')
+    default_validators = CharField.default_validators + [validate_cpf]
+
+    def __init__(self, *args, **kwargs):
+        kwargs['max_length'] = CPF_LEN
+        super(CPFField, self).__init__(*args, **kwargs)
