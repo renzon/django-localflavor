@@ -11,13 +11,13 @@ CPF_LEN = 11
 _re_cpf_mask_chars = re.compile(r'[-\.]')
 
 
-def validate_digits_only(cpf):
-    if not cpf.isdigit():
+def validate_digits_only(value):
+    if not value.isdigit():
         raise ValidationError(_('Must contain only digits.'), 'digits')
 
 
-def validate_has_exactly_len(cpf, n):
-    if len(cpf) != n:
+def validate_has_exactly_len(value, n):
+    if len(value) != n:
         raise ValidationError(
             _('Must have exactly {number} digits.').format(number=n),
             'length'
