@@ -21,9 +21,7 @@ class CPFFormField(EmptyValueCompatMixin, CharField):
     def __init__(self, max_length=14, min_length=11, strip=True,
                  empty_value='', *args, **kwargs):
         super(CPFFormField, self).__init__(
-            max_length=max_length,
-            min_length=min_length,
-            strip=strip, empty_value=empty_value, *args, **kwargs)
+            max_length, min_length, strip, empty_value, *args, **kwargs)
 
     def validate(self, value):
         value = super(CPFFormField, self).validate(value)
