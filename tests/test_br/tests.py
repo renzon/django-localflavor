@@ -3,9 +3,9 @@ from __future__ import unicode_literals
 
 from django.test import SimpleTestCase, TestCase
 
-from localflavor.br.forms import (BRCNPJField, BRCPFField, BRPhoneNumberField,
-                                  BRProcessoField, BRStateChoiceField,
+from localflavor.br.forms import (BRCNPJField, BRCPFField, BRPhoneNumberField, BRProcessoField, BRStateChoiceField,
                                   BRStateSelect, BRZipCodeField)
+
 from .models import BrCitizen
 from .forms import BrCitizenForm
 

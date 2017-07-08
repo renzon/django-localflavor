@@ -14,6 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 from localflavor.br.validators import remove_cpf_non_digits, validate_cpf
 from localflavor.compat import EmptyValueCompatMixin
 from localflavor.generic.forms import DeprecatedPhoneNumberFormFieldMixin
+
 from .br_states import STATE_CHOICES
 
 
