@@ -236,27 +236,24 @@ VALID_CPFS = [
 class BrCitizenTests(TestCase):
     def test_cpf_is_valid(self):
         for cpf, _ in VALID_CPFS:
-            with self.subTest(cpf):
-                valid_data = dict(VALID_DATA)
-                valid_data['cpf'] = cpf
-                form = BrCitizenForm(valid_data)
-                self.assertTrue(form.is_valid(), form.errors)
+            valid_data = dict(VALID_DATA)
+            valid_data['cpf'] = cpf
+            form = BrCitizenForm(valid_data)
+            self.assertTrue(form.is_valid(), form.errors)
 
     def test_cpf_cleaned_data(self):
         for cpf, cleaned_cpf in VALID_CPFS:
-            with self.subTest(cpf):
-                valid_data = dict(VALID_DATA)
-                valid_data['cpf'] = cpf
-                form = BrCitizenForm(valid_data)
-                form.is_valid()
-                self.assertEqual(cleaned_cpf, form.cleaned_data['cpf'])
+            valid_data = dict(VALID_DATA)
+            valid_data['cpf'] = cpf
+            form = BrCitizenForm(valid_data)
+            form.is_valid()
+            self.assertEqual(cleaned_cpf, form.cleaned_data['cpf'])
 
     def test_cpf_get_prep_value(self):
         for cpf, _ in VALID_CPFS:
-            with self.subTest(cpf):
-                valid_data = dict(VALID_DATA)
-                valid_data['cpf'] = cpf
-                form = BrCitizenForm(valid_data)
-                form.is_valid()
-                BrCitizen.objects.create(**form.cleaned_data)
-                self.assertTrue(BrCitizen.objects.filter(cpf=cpf).exists())
+            valid_data = dict(VALID_DATA)
+            valid_data['cpf'] = cpf
+            form = BrCitizenForm(valid_data)
+            form.is_valid()
+            BrCitizen.objects.create(**form.cleaned_data)
+            self.assertTrue(BrCitizen.objects.filter(cpf=cpf).exists())
