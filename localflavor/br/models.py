@@ -33,7 +33,7 @@ class CPFField(CharField):
 
     def get_prep_value(self, value):
         value = remove_cpf_non_digits(value)
-        return super().get_prep_value(value)
+        return super(CPFField, self).get_prep_value(value)
 
     def formfield(self, **kwargs):
         defaults = {'form_class': CPFFormField}
