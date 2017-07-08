@@ -206,7 +206,8 @@ class BRCNPJField(EmptyValueCompatMixin, CharField):
 
     Otherwise both formats will be valid.
 
-    .. _Brazilian CNPJ: http://en.wikipedia.org/wiki/National_identification_number#Brazil
+    .. _Brazilian CNPJ:
+      http://en.wikipedia.org/wiki/National_identification_number#Brazil
     .. versionchanged:: 1.4
     """
 
