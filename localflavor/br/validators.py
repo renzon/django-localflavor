@@ -2,12 +2,13 @@
 from __future__ import unicode_literals
 
 import re
+from itertools import chain
 
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _
 
 CPF_LEN = 11
-_re_match_numeric_chars = re.compile(r'[^0-9]')
+_re_cpf_mask_chars = re.compile(r'[-\.]')
 
 
 def validate_digits_only(cpf):
@@ -23,8 +24,10 @@ def validate_has_exactly_len(cpf, n):
         )
 
 
-def remove_non_digits(s):
-    return _re_match_numeric_chars.sub('', s)
+def remove_cpf_non_digits(s):
+    if s:
+        s = _re_cpf_mask_chars.sub('', s)
+    return s
 
 
 def _dv_maker(v):
@@ -37,17 +40,16 @@ def _dv_maker(v):
 def validate_cpf(cpf):
     validate_digits_only(cpf)
     validate_has_exactly_len(cpf, CPF_LEN)
-    orig_dv = cpf[-2:]
-    orig_cpf = cpf[:]
-    new_1dv = sum(
-        [i * int(cpf[idx]) for idx, i in enumerate(range(10, 1, -1))])
-    new_1dv = _dv_maker(new_1dv)
-    cpf = cpf[:-2] + str(new_1dv) + cpf[-1]
-    new_2dv = sum(
-        [i * int(cpf[idx]) for idx, i in enumerate(range(11, 1, -1))])
-    new_2dv = _dv_maker(new_2dv)
-    cpf = cpf[:-1] + str(new_2dv)
-    if cpf[-2:] != orig_dv:
+    cpf_without_dv = cpf[:-2]
+    rev_digits = list(map(int, reversed(cpf_without_dv)))
+    dv = sum(
+        i * digit for i, digit in enumerate(rev_digits, start=2))
+    dvs = [_dv_maker(dv)]
+    rev_digits = chain(dvs, rev_digits)
+    dv = sum(
+        i * digit for i, digit in enumerate(rev_digits, start=2))
+    dvs.append(_dv_maker(dv))
+    if cpf[-2:] != ''.join(map(str, dvs)):
         raise ValidationError(_('Invalid CPF number.'))
 
-    return orig_cpf
+    return cpf

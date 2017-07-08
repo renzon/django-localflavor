@@ -11,9 +11,28 @@ from django.forms.fields import CharField, Field, RegexField, Select
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
+from localflavor.br.validators import remove_cpf_non_digits, validate_cpf
 from localflavor.compat import EmptyValueCompatMixin
 from localflavor.generic.forms import DeprecatedPhoneNumberFormFieldMixin
 from .br_states import STATE_CHOICES
+
+
+class CPFFormField(CharField):
+    def __init__(self, max_length=14, min_length=11, strip=True,
+                 empty_value='', *args, **kwargs):
+        super().__init__(max_length, min_length, strip, empty_value, *args,
+                         **kwargs)
+
+    def validate(self, value):
+        value = super(CPFFormField, self).validate(value)
+        if value:
+            return validate_cpf(value)
+        return value
+
+    def to_python(self, value):
+        value = super(CPFFormField, self).to_python(value)
+        return remove_cpf_non_digits(value)
+
 
 # Bellow code define only Form Fields not related to any specific Model field
 # Form localfavor > 1.5 br.models are defined with related form fields and

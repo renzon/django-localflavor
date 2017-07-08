@@ -1,7 +1,9 @@
 from django.db.models import CharField
 from django.utils.translation import ugettext_lazy as _
 
-from localflavor.br.validators import CPF_LEN, validate_cpf
+from localflavor.br.forms import CPFFormField
+from localflavor.br.validators import CPF_LEN, validate_cpf, \
+    remove_cpf_non_digits
 from .br_states import STATE_CHOICES
 
 
@@ -28,3 +30,12 @@ class CPFField(CharField):
     def __init__(self, *args, **kwargs):
         kwargs['max_length'] = CPF_LEN
         super(CPFField, self).__init__(*args, **kwargs)
+
+    def get_prep_value(self, value):
+        value = remove_cpf_non_digits(value)
+        return super().get_prep_value(value)
+
+    def formfield(self, **kwargs):
+        defaults = {'form_class': CPFFormField}
+        defaults.update(kwargs)
+        return super(CPFField, self).formfield(**defaults)

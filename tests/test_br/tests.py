@@ -6,6 +6,7 @@ from django.test import SimpleTestCase, TestCase
 from localflavor.br.forms import (BRCNPJField, BRCPFField, BRPhoneNumberField,
                                   BRProcessoField, BRStateChoiceField,
                                   BRStateSelect, BRZipCodeField)
+from tests.test_br.models import BrCitizen
 from .forms import BrCitizenForm
 
 
@@ -224,26 +225,38 @@ class BRLocalFlavorTests(SimpleTestCase):
 
 VALID_DATA = {'cpf': '95173252740', 'cpf_optional': ''}
 
+VALID_CPFS = [
+    ('663.256.017-26', '66325601726'),
+    ('66325601726', '66325601726'),
+    ('375.788.573-20', '37578857320'),
+    ('84828509895', '84828509895')
+]
+
 
 class BrCitizenTests(TestCase):
-    def setUp(self):
-        self.form = BrCitizenForm(VALID_DATA)
+    def test_cpf_is_valid(self):
+        for cpf, _ in VALID_CPFS:
+            with self.subTest(cpf):
+                valid_data = dict(VALID_DATA)
+                valid_data['cpf'] = cpf
+                form = BrCitizenForm(valid_data)
+                self.assertTrue(form.is_valid(), form.errors)
 
-    def test_is_valid(self):
-        self.assertTrue(self.form.is_valid())
+    def test_cpf_cleaned_data(self):
+        for cpf, cleaned_cpf in VALID_CPFS:
+            with self.subTest(cpf):
+                valid_data = dict(VALID_DATA)
+                valid_data['cpf'] = cpf
+                form = BrCitizenForm(valid_data)
+                form.is_valid()
+                self.assertEqual(cleaned_cpf, form.cleaned_data['cpf'])
 
-    # def test_clean_cpf(self):
-    #     valid_cpfs = [
-    #         ('663.256.017-26', '66325601726'),
-    #         ('66325601726', '66325601726'),
-    #         ('375.788.573-20', '37578857320'),
-    #         ('84828509895', '84828509895')
-    #     ]
-    #
-    #     for cpf, normalized in valid_cpfs:
-    #         with self.subTest(cpf):
-    #             valid_data = dict(VALID_DATA)
-    #             valid_data['cpf'] = cpf
-    #             form = BrCitizenForm(valid_data)
-    #             form.is_valid()
-    #             self.assertEqual(normalized, form.cleaned_data['cpf'])
+    def test_cpf_get_prep_value(self):
+        for cpf, _ in VALID_CPFS:
+            with self.subTest(cpf):
+                valid_data = dict(VALID_DATA)
+                valid_data['cpf'] = cpf
+                form = BrCitizenForm(valid_data)
+                form.is_valid()
+                BrCitizen.objects.create(**form.cleaned_data)
+                self.assertTrue(BrCitizen.objects.filter(cpf=cpf).exists())
