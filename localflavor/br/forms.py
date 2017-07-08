@@ -17,7 +17,7 @@ from localflavor.generic.forms import DeprecatedPhoneNumberFormFieldMixin
 from .br_states import STATE_CHOICES
 
 
-class CPFFormField(CharField):
+class CPFFormField(EmptyValueCompatMixin, CharField):
     def __init__(self, max_length=14, min_length=11, strip=True,
                  empty_value='', *args, **kwargs):
         super(CPFFormField, self).__init__(
