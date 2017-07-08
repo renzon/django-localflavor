@@ -6,8 +6,8 @@ from django.test import SimpleTestCase, TestCase
 from localflavor.br.forms import (BRCNPJField, BRCPFField, BRPhoneNumberField, BRProcessoField, BRStateChoiceField,
                                   BRStateSelect, BRZipCodeField)
 
-from .models import BrCitizen
 from .forms import BrCitizenForm
+from .models import BrCitizen
 
 
 class BRLocalFlavorTests(SimpleTestCase):

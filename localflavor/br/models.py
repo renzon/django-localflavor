@@ -2,9 +2,8 @@ from django.db.models import CharField
 from django.utils.translation import ugettext_lazy as _
 
 from localflavor.br.forms import CPFFormField
-from localflavor.br.validators import (CPF_LEN,
-                                       validate_cpf,
-                                       remove_cpf_non_digits)
+from localflavor.br.validators import CPF_LEN, validate_cpf, remove_cpf_non_digits
+
 from .br_states import STATE_CHOICES
 
 
